@@ -1,9 +1,16 @@
+using System;
+using System.Linq;
 using static System.Console;
 using static Sorts;
 using static Checks;
 
 class Program
 {
+    private const int N = 9;
+    private const int K = 17;
+    private const int KeyRange = 20 * K + 1;
+
+
     record Student(string Name, int Group, int Score);
     static readonly Func<int, int, int> Compare = (x, y) => x.CompareTo(y);
     static readonly Func<Student, Student, int> Keys = (x, y) => x.Group != y.Group ? x.Group.CompareTo(y.Group) : x.Score.CompareTo(y.Score);
@@ -15,9 +22,9 @@ class Program
     }
     static int[] Data(int n)
     {
-        var random = new Random(9);
+        var random = new Random(N);
         var data = new int[n];
-        for (int i = 0; i < n; i++) data[i] = random.Next(341);
+        for (int i = 0; i < n; i++) data[i] = random.Next(KeyRange);
         return data;
     }
     static void TwoPass(Student[] data, out long comparisons, out long moves)
@@ -29,10 +36,12 @@ class Program
     }
     static void Main()
     {
+        // ЗАВДАННЯ 1: Трасування сортування вибором.
         WriteLine("## Трасування");
         var trace = Data(8);
         WriteLine("Початок → " + string.Join(", ", trace));
         Selection(trace, Compare, out _, out _, row => WriteLine("\n→ " + string.Join(", ", row)));
+        // ЗАВДАННЯ 2: Порівняння алгоритмів на різних входах.
         WriteLine("\n## Порівняння / записи (включно з буфером)\n");
         WriteLine("| n | Вхід | Вибір | Злиття | Складений ключ | Два проходи |\n|---:|---|---:|---:|---:|---:|");
         foreach (int n in new[] { 100, 1000, 10000 })
@@ -43,8 +52,8 @@ class Program
                 if (kind == "спадає") Array.Reverse(input);
                 if (kind == "майже")
                 {
-                    var r = new Random(9);
-                    for (int i = 0; i < 17; i++) { int x = r.Next(n), y = r.Next(n); (input[x], input[y]) = (input[y], input[x]); }
+                    var r = new Random(N);
+                    for (int i = 0; i < K; i++) { int x = r.Next(n), y = r.Next(n); (input[x], input[y]) = (input[y], input[x]); }
                 }
                 var a = (int[])input.Clone();
                 Selection(a, Compare, out long c, out long m);
@@ -63,6 +72,7 @@ class Program
                 WriteLine($"| {n} | {kind} | {c}/{m} | {d}/{k} | {e}/{f} | {g}/{h} |");
                 if (n == 10000 && kind == "випадковий") Ratio = (double)c / d;
             }
+        // ЗАВДАННЯ 3: Вимірювання швидкодії.
         WriteLine("\n## Час у мс (мінімум із трьох після прогріву)\n");
         WriteLine("| n | Вибір | Злиття | Два ключі (один / два проходи) | Array.Sort |\n|---:|---:|---:|---:|---:|");
         foreach (int n in new[] { 1000, 10000, 100000, 1000000 })
@@ -78,6 +88,7 @@ class Program
             double ms = Measurements.Best(() => Selection((int[])a.Clone(), Compare, out _, out _));
             if (ms > 1000) { WriteLine($"\nПерший перевірений розмір понад секунду (крок 5000) — {n}, {ms:F1} мс."); break; }
         }
+        // ЗАВДАННЯ 4: Перевірка стабільності сортування студентів.
         WriteLine("\n## Стабільність за балом\n\n| Метод | Очікувано | Фактично на вибірці | Перша інверсія прізвищ |\n|---|---|---|---|");
         var sample = Students(Data(120));
         for (int method = 0; method < 4; method++)
@@ -95,15 +106,26 @@ class Program
                 { pair = sorted[i - 1].Name + " → " + sorted[i].Name; break; }
             WriteLine($"| {new[] { "Вибір", "Злиття", "Array.Sort", "OrderBy" }[method]} | {(method % 2 == 1 ? "стабільний" : "нестабільний")} | {(pair == "—" ? "збережено" : "порушено")} | {pair} |");
         }
+        // ЗАВДАННЯ 5: Крайові випадки.
         WriteLine("\n## Крайові випадки\n\n| Вхід | Очікувано | Отримано |\n|---|---|---|");
         foreach (int[] a in new int[][] { [], [1], [1, 2], [2, 1], [3, 3, 3], [2, 2, 1, 1] })
         {
             var x = (int[])a.Clone();
-            Selection(x, Compare, out _, out _); Verify(a, x, Compare);
-            Merge(x, Compare, out _, out _); Verify(a, x, Compare);
-            var s = Students(a); var t = (Student[])s.Clone();
-            TwoPass(t, out _, out _); Verify(s, t, Keys);
-            Merge(t, Keys, out _, out _); Verify(s, t, Keys);
+            Selection(x, Compare, out _, out _);
+            Verify(a, x, Compare);
+
+            x = (int[])a.Clone();
+            Merge(x, Compare, out _, out _);
+            Verify(a, x, Compare);
+
+            Student[] s = Students(a);
+            Student[] t = (Student[])s.Clone();
+            TwoPass(t, out _, out _);
+            Verify(s, t, Keys);
+
+            t = (Student[])s.Clone();
+            Merge(t, Keys, out _, out _);
+            Verify(s, t, Keys);
             WriteLine($"| [{string.Join(",", a)}] | порядок і склад збережені | пройдено |");
         }
         WriteLine($"\nНа випадковому вході з 10 000 чисел вибір зробив у {Ratio:F2} раза більше порівнянь. Лекційні 376 спираються на n log₂ n, а тут пораховані фактичні виклики компаратора.");
