@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using static System.Console;
 using static Sorts;
 using static Checks;
@@ -9,7 +7,6 @@ class Program
     private const int N = 9;
     private const int K = 17;
     private const int KeyRange = 20 * K + 1;
-
 
     record Student(string Name, int Group, int Score);
     static readonly Func<int, int, int> Compare = (x, y) => x.CompareTo(y);
@@ -36,12 +33,10 @@ class Program
     }
     static void Main()
     {
-        // ЗАВДАННЯ 1: Трасування сортування вибором.
         WriteLine("## Трасування");
         var trace = Data(8);
         WriteLine("Початок → " + string.Join(", ", trace));
         Selection(trace, Compare, out _, out _, row => WriteLine("\n→ " + string.Join(", ", row)));
-        // ЗАВДАННЯ 2: Порівняння алгоритмів на різних входах.
         WriteLine("\n## Порівняння / записи (включно з буфером)\n");
         WriteLine("| n | Вхід | Вибір | Злиття | Складений ключ | Два проходи |\n|---:|---|---:|---:|---:|---:|");
         foreach (int n in new[] { 100, 1000, 10000 })
@@ -72,7 +67,6 @@ class Program
                 WriteLine($"| {n} | {kind} | {c}/{m} | {d}/{k} | {e}/{f} | {g}/{h} |");
                 if (n == 10000 && kind == "випадковий") Ratio = (double)c / d;
             }
-        // ЗАВДАННЯ 3: Вимірювання швидкодії.
         WriteLine("\n## Час у мс (мінімум із трьох після прогріву)\n");
         WriteLine("| n | Вибір | Злиття | Два ключі (один / два проходи) | Array.Sort |\n|---:|---:|---:|---:|---:|");
         foreach (int n in new[] { 1000, 10000, 100000, 1000000 })
@@ -88,7 +82,6 @@ class Program
             double ms = Measurements.Best(() => Selection((int[])a.Clone(), Compare, out _, out _));
             if (ms > 1000) { WriteLine($"\nПерший перевірений розмір понад секунду (крок 5000) — {n}, {ms:F1} мс."); break; }
         }
-        // ЗАВДАННЯ 4: Перевірка стабільності сортування студентів.
         WriteLine("\n## Стабільність за балом\n\n| Метод | Очікувано | Фактично на вибірці | Перша інверсія прізвищ |\n|---|---|---|---|");
         var sample = Students(Data(120));
         for (int method = 0; method < 4; method++)
@@ -106,7 +99,6 @@ class Program
                 { pair = sorted[i - 1].Name + " → " + sorted[i].Name; break; }
             WriteLine($"| {new[] { "Вибір", "Злиття", "Array.Sort", "OrderBy" }[method]} | {(method % 2 == 1 ? "стабільний" : "нестабільний")} | {(pair == "—" ? "збережено" : "порушено")} | {pair} |");
         }
-        // ЗАВДАННЯ 5: Крайові випадки.
         WriteLine("\n## Крайові випадки\n\n| Вхід | Очікувано | Отримано |\n|---|---|---|");
         foreach (int[] a in new int[][] { [], [1], [1, 2], [2, 1], [3, 3, 3], [2, 2, 1, 1] })
         {

@@ -1,4 +1,3 @@
-using System;
 using static System.Console;
 using static Search;
 
@@ -7,7 +6,6 @@ class Program
     private const int N = 9;
     private const int K = 17;
     private const int KeyRange = 20 * K + 1;
-
 
     static readonly Func<int, int, int> Compare = (a, b) => a.CompareTo(b);
     static int[] Data(int n)
@@ -19,7 +17,6 @@ class Program
     }
     static void Main()
     {
-        // ЗАВДАННЯ 1: Порівняння трьох алгоритмів пошуку.
         int[] raw = Data(100000);
         int[] a = (int[])raw.Clone();
         Array.Sort(a);
@@ -37,7 +34,6 @@ class Program
             }
             WriteLine($"| {x} | {l} / {lc} | {b} / {bc} | {p} / {pc} |");
         }
-        // ЗАВДАННЯ 2: Навмисні помилки бінарного пошуку.
         WriteLine("\n## Чотири поломки\n");
         WriteLine($"1. [1], шукаємо 1. Умова lo < hi пропускає єдину позицію, результат {Broken.Strict([1], 1)}.");
         WriteLine($"2. [1, 2], шукаємо 2. Присвоєння lo = mid залишає межі на місці: {Broken.Stuck([1, 2], 2)}.");
@@ -46,7 +42,6 @@ class Program
         var r = new Random(N);
         for (int i = 0; i < 100; i++) if (Broken.Unsorted(raw, raw[r.Next(raw.Length)]) < 0) missed++;
         WriteLine($"4. Без сортування пропущено {missed} зі 100 наявних запитів.");
-        // ЗАВДАННЯ 3: Межі блока однакових значень.
         int lower = Bound(a, v => v >= 10 * K, out int lowCost);
         int upper = Bound(a, v => v > 10 * K, out int highCost);
         int last = -1, count = 0;
@@ -55,7 +50,6 @@ class Program
         WriteLine($"\n## Межі\n\nБлок [ {lower}, {upper} ). Останній індекс {last} за {highCost} порівнянь; кількість {count} за {lowCost + highCost}. Контроль повним обходом — {a.Length} порівнянь для обох відповідей. На кожній ітерації лишається половина ділянки незалежно від кількості повторів.");
         int invalid = Bound(a, v => v % 7 == 0, out _);
         WriteLine($"Умова кратності 7 чергує істину й хибу. Метод дав {invalid}, перша правильна позиція 0 (значення {a[0]}).");
-        // ЗАВДАННЯ 4: Підрахунок порівнянь.
         WriteLine("\n## Середні порівняння для 100 запитів\n\n| n | Лінійний | Бінарний | Відношення | n/2 | log₂ n |\n|---:|---:|---:|---:|---:|---:|");
         foreach (int n in new[] { 1000, 10000, 100000, 1000000 })
         {
@@ -64,7 +58,6 @@ class Program
             for (int i = 0; i < 100; i++) { int x = r.Next(KeyRange); LinearSearch(data, x, Compare, out int l); BinarySearch(data, x, Compare, out int b); lc += l; bc += b; }
             WriteLine($"| {n} | {lc / 100.0:F2} | {bc / 100.0:F2} | {(double)lc / bc:F2} | {n / 2} | {Math.Log2(n):F2} |");
         }
-        // ЗАВДАННЯ 5: Вимірювання часу.
         WriteLine("\n## Окупність сортування\n\n| q | Перебір, мс | Сортування + пошук, мс | Швидший |\n|---:|---:|---:|---|");
         r = new Random(N);
         var queries = new int[51200];
@@ -79,7 +72,6 @@ class Program
             if (q >= 100 && first > 0) break;
         }
         WriteLine($"\nПерша виміряна перемога сортування: {(first == 0 ? "поза перевіреним діапазоном" : first.ToString())}. Оцінка 34 припускає довгий перебір. Тут лише 341 можливий ключ, тому на випадковому невпорядкованому вході копія ключа зазвичай трапляється значно раніше за середину.");
-        // Перевірка крайових випадків.
         WriteLine("\n## Крайові випадки\n\n| Масив, запит | Очікувані індекс / межі | Отримано |\n|---|---|---|");
         foreach (var (data, x, expected, lo, hi) in new (int[], int, int, int, int)[] { ([], 1, -1, 0, 0), ([1], 1, 0, 0, 1), ([1, 2], 2, 1, 1, 2), ([2, 3], 1, -1, 0, 0), ([2, 3], 4, -1, 2, 2), ([2, 2, 2], 2, 1, 0, 3) })
         {

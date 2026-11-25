@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.Globalization;
 using System.Text;
 using static System.Console;
@@ -22,7 +20,6 @@ class Program
         }
         string text = sourceText[..TextLength];
         var words = text.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
-        // ЗАВДАННЯ 1: Особливості роботи з рядками.
         WriteLine("## Три пастки\n\n| Додавань | +=, мс | StringBuilder, мс |\n|---:|---:|---:|");
         foreach (int n in new[] { 10000, 100000 })
         {
@@ -40,7 +37,6 @@ class Program
         double ord = Time(() => { sample.CopyTo(ordinal, 0); Array.Sort(ordinal, StringComparer.Ordinal); });
         double cult = Time(() => { sample.CopyTo(ukrainian, 0); Array.Sort(ukrainian, StringComparer.Create(new CultureInfo("uk-UA"), false)); });
         WriteLine($"\nOrdinal ({ord:F4} мс) — {string.Join(", ", ordinal)}.\n\nuk-UA ({cult:F4} мс) — {string.Join(", ", ukrainian)}. Український порядок ставить ґ після г. В Ordinal позицію визначає код UTF-16.");
-        // ЗАВДАННЯ 2: Наївний пошук та ковзне вікно.
         WriteLine("\n## Найдовший підрядок без повторів\n\n| Символів | Наївно, мс | Вікно, мс | Виграш | Довжина |\n|---:|---:|---:|---:|---:|");
         double finalSlow = 0, finalFast = 0;
         foreach (int n in new[] { 1000, 10000, TextLength })
@@ -49,7 +45,6 @@ class Program
             finalSlow = Time(() => Naive(slice)); finalFast = Time(() => Window(slice));
             WriteLine($"| {n} | {finalSlow:F4} | {finalFast:F4} | {finalSlow / finalFast:F2} | {Window(slice).Length} |");
         }
-        // ЗАВДАННЯ 3: Пошук підрядка.
         WriteLine("\n## Пошук підрядка\n\n| Вхід | Шаблон | Індекс | Порівнянь | Власний, мс | IndexOf, мс |\n|---|---|---:|---:|---:|---:|");
         foreach (var (source, pattern, label) in new[] { (text, "Канівщина", "проза"), (text, "електросамокат", "проза"), (new string('М', 10000), new string('М', 1069) + "Н", "повтори") })
         {
@@ -58,7 +53,6 @@ class Program
             WriteLine($"| {label} | {(pattern.Length > 30 ? "1069 × М + Н" : pattern)} | {pos} | {c} | {Time(() => TextAlgorithms.IndexOf(source, pattern, out _)):F4} | {Time(() => source.IndexOf(pattern, StringComparison.Ordinal)):F4} |");
         }
         WriteLine("\nНа повторах кожен початок збігається аж до останньої літери шаблону. Бібліотечний пошук може відкидати кандидатів блоками. Його внутрішні порівняння тут не підраховувалися.");
-        // ЗАВДАННЯ 4: Вибір неперетинних інтервалів.
         Random random = new Random(N);
         int wins = 0;
         Interval[] Generate(int n)
@@ -81,7 +75,6 @@ class Program
             if (Exact(data, false, out long full) != Exact(data, true, out long cut)) throw new Exception();
             WriteLine($"| {n} | {Time(() => Exact(data, false, out _)):F4} | {Time(() => Exact(data, true, out _)):F4} | {full} / {cut} |");
         }
-        // ЗАВДАННЯ 5: Перевірка крайових випадків.
         WriteLine("\n## Крайові випадки\n\n| Запит | Очікувано | Отримано |\n|---|---|---|");
         foreach (var (s, expected) in new[] { ("", ""), ("я", "я"), ("ммм", "м"), ("  аб  в ", " аб") })
         {
